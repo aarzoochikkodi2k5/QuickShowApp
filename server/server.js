@@ -12,8 +12,9 @@ import userRouter from "./routes/userRoutes.js";
 import { stripeWebhooks } from "./controllers/stripeWebhooks.js";
 
 const app = express();
-const port = 3000;
+const port = process.env.PORT || 3000; // ✅ Use Render's PORT
 
+// Connect to MongoDB using environment variable
 await connectDB();
 
 // Stripe Webhooks Route
@@ -36,6 +37,8 @@ app.use("/api/booking", bookingRouter);
 app.use("/api/admin", adminRouter);
 app.use("/api/user", userRouter);
 
+// Start server
 app.listen(port, () =>
-  console.log(`Server listening at http://localhost:${port}`)
+  console.log(`Server listening at port ${port}`) // ✅ Log without localhost
 );
+
