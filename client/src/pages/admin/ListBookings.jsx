@@ -3,6 +3,7 @@ import Loading from "../../components/Loading";
 import Title from "../../components/admin/Title";
 import { dateFormat } from "../../lib/dateFormat";
 import { useAppContext } from "../../context/AppContext";
+import { API_URL } from "../../config"; // ✅ Import API_URL
 
 const ListBookings = () => {
   const currency = import.meta.env.VITE_CURRENCY;
@@ -14,7 +15,8 @@ const ListBookings = () => {
 
   const getAllBookings = async () => {
     try {
-      const { data } = await axios.get("/api/admin/all-bookings", {
+      // ✅ Use API_URL for deployed backend
+      const { data } = await axios.get(`${API_URL}/api/admin/all-bookings`, {
         headers: { Authorization: `Bearer ${await getToken()}` },
       });
       setBookings(data.bookings);
@@ -73,3 +75,4 @@ const ListBookings = () => {
 };
 
 export default ListBookings;
+
