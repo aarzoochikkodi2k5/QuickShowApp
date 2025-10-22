@@ -1,3 +1,5 @@
+import { API_URL } from "../../config"; // adjust path based on location of config.js
+
 import { useEffect, useState } from "react";
 import Loading from "../../components/Loading";
 import Title from "../../components/admin/Title";
@@ -19,9 +21,10 @@ const AddShows = () => {
 
   const fetchNowPlayingMovies = async () => {
     try {
-      const { data } = await axios.get("/api/show/now-playing", {
-        headers: { Authorization: `Bearer ${await getToken()}` },
-      });
+      const { data } = await axios.get(`${API_URL}/api/show/now-playing`, {
+  headers: { Authorization: `Bearer ${await getToken()}` },
+});
+
 
       if (data.success) {
         setNowPlayingMovies(data.movies);
@@ -82,9 +85,10 @@ const AddShows = () => {
         showPrice: Number(showPrice),
       };
 
-      const { data } = await axios.post("/api/show/add", payload, {
-        headers: { Authorization: `Bearer ${await getToken()}` },
-      });
+      const { data } = await axios.post(`${API_URL}/api/show/add`, payload, {
+  headers: { Authorization: `Bearer ${await getToken()}` },
+});
+
 
       if (data.success) {
         toast.success(data.message);
