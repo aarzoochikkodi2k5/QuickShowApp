@@ -94,21 +94,30 @@ export const addShow = async (req, res) => {
 };
 
 // API to get all shows from the database
+// API to get all shows from the database
 export const getShows = async (req, res) => {
   try {
+    // Find all upcoming shows and populate the movie details
     const shows = await Show.find({ showDateTime: { $gte: new Date() } })
       .populate("movie")
       .sort({ showDateTime: 1 });
 
-    // filter unique shows
-    const uniqueShows = new Set(shows.map((show) => show.movie));
+    // Filter unique movies from the shows
+    const uniqueShowsMap = new Map();
+    shows.forEach((show) => {
+      if (!uniqueShowsMap.has(show.movie._id.toString())) {
+        uniqueShowsMap.set(show.movie._id.toString(), show.movie);
+      }
+    });
 
-    res.json({ success: true, shows: Array.from(uniqueShows) });
+    // Send unique movies as response
+    res.json({ success: true, shows: Array.from(uniqueShowsMap.values()) });
   } catch (error) {
     console.error(error);
     res.json({ success: false, message: error.message });
   }
 };
+
 
 // API to get a single show from the database
 export const getShow = async (req, res) => {
