@@ -1,2 +1,2 @@
-// QuickShowApp/client/src/config.js
-export const API_URL = "https://quickshowapp.onrender.com";
+export const API_URL = import.meta.env.VITE_API_URL;
+
