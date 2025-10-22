@@ -24,7 +24,6 @@ const SeatLayout = () => {
   const [occupiedSeats, setOccupiedSeats] = useState([]);
 
   const navigate = useNavigate();
-
   const { axios, getToken, user } = useAppContext();
 
   const getShow = async () => {
@@ -39,15 +38,11 @@ const SeatLayout = () => {
   };
 
   const handleSeatClick = (seatId) => {
-    if (!selectedTime) {
-      return toast("Please select time first");
-    }
-    if (!selectedSeats.includes(seatId) && selectedSeats.length > 4) {
-      return toast("You can only select 5 seats");
-    }
-    if (occupiedSeats.includes(seatId)) {
-      return toast("This seat is already booked");
-    }
+    if (!selectedTime) return toast("Please select time first");
+    if (!selectedSeats.includes(seatId) && selectedSeats.length >= 5)
+      return toast("You can only select up to 5 seats");
+    if (occupiedSeats.includes(seatId)) return toast("This seat is already booked");
+
     setSelectedSeats((prev) =>
       prev.includes(seatId)
         ? prev.filter((seat) => seat !== seatId)
@@ -57,32 +52,33 @@ const SeatLayout = () => {
 
   const renderSeats = (row, count = 9) => (
     <div key={row} className="flex gap-2 mt-2">
-      <div className="flex flex-wrap items-center justify-center gap-2">
-        {Array.from({ length: count }, (_, i) => {
-          const seatId = `${row}${i + 1}`;
-          return (
-            <button
-              key={seatId}
-              onClick={() => handleSeatClick(seatId)}
-              className={`h-8 w-8 rounded border border-primary/60 cursor-pointer ${
-                selectedSeats.includes(seatId) && "bg-primary text-white"
-              } ${occupiedSeats.includes(seatId) && "opacity-50"}`}
-            >
-              {seatId}
-            </button>
-          );
-        })}
-      </div>
+      {Array.from({ length: count }, (_, i) => {
+        const seatId = `${row}${i + 1}`;
+        const isOccupied = occupiedSeats.includes(seatId);
+        const isSelected = selectedSeats.includes(seatId);
+
+        return (
+          <button
+            key={seatId}
+            onClick={() => handleSeatClick(seatId)}
+            disabled={isOccupied}
+            className={`h-8 w-8 rounded border border-primary/60 cursor-pointer transition ${
+              isSelected ? "bg-primary text-white" : ""
+            } ${isOccupied ? "opacity-50 cursor-not-allowed" : ""}`}
+          >
+            {seatId}
+          </button>
+        );
+      })}
     </div>
   );
 
   const getOccupiedSeats = async () => {
+    if (!selectedTime?.showId) return;
     try {
-      const { data } = await axios.get(
-        `/api/booking/seats/${selectedTime.showId}`
-      );
+      const { data } = await axios.get(`/api/booking/seats/${selectedTime.showId}`);
       if (data.success) {
-        setOccupiedSeats(data.occupiedSeats);
+        setOccupiedSeats(data.occupiedSeats || []);
       } else {
         toast.error(data.message);
       }
@@ -94,7 +90,6 @@ const SeatLayout = () => {
   const bookTickets = async () => {
     try {
       if (!user) return toast.error("Please login to proceed");
-
       if (!selectedTime || !selectedSeats.length)
         return toast.error("Please select a time and seats");
 
@@ -119,31 +114,37 @@ const SeatLayout = () => {
   }, []);
 
   useEffect(() => {
-    if (selectedTime) {
-      getOccupiedSeats();
-    }
+    if (selectedTime) getOccupiedSeats();
   }, [selectedTime]);
 
-  return show ? (
+  if (!show) return <Loading />;
+
+  const availableTimes = show.dateTime?.[date] || [];
+
+  return (
     <div className="flex flex-col md:flex-row px-6 md:px-16 lg:px-40 py-30 md:pt-50">
       {/* Available Timings */}
       <div className="w-60 bg-primary/10 border border-primary/20 rounded-lg py-10 h-max md:sticky md:top-30">
         <p className="text-lg font-semibold px-6">Available Timings</p>
         <div className="mt-5 space-y-1">
-          {show.dateTime[date].map((item) => (
-            <div
-              key={item.time}
-              onClick={() => setSelectedTime(item)}
-              className={`flex items-center gap-2 px-6 py-2 w-max rounded-r-md cursor-pointer transition ${
-                selectedTime?.time === item.time
-                  ? "bg-primary text-white"
-                  : "hover:bg-primary/20"
-              }`}
-            >
-              <ClockIcon className="w-4 h-4" />
-              <p className="text-sm">{isoTimeFormat(item.time)}</p>
-            </div>
-          ))}
+          {availableTimes.length > 0 ? (
+            availableTimes.map((item) => (
+              <div
+                key={item.time}
+                onClick={() => setSelectedTime(item)}
+                className={`flex items-center gap-2 px-6 py-2 w-max rounded-r-md cursor-pointer transition ${
+                  selectedTime?.time === item.time
+                    ? "bg-primary text-white"
+                    : "hover:bg-primary/20"
+                }`}
+              >
+                <ClockIcon className="w-4 h-4" />
+                <p className="text-sm">{isoTimeFormat(item.time)}</p>
+              </div>
+            ))
+          ) : (
+            <p className="px-6 py-2 text-sm text-gray-500">No timings available for this date</p>
+          )}
         </div>
       </div>
 
@@ -174,9 +175,8 @@ const SeatLayout = () => {
         </button>
       </div>
     </div>
-  ) : (
-    <Loading />
   );
 };
 
 export default SeatLayout;
+
