@@ -3,6 +3,7 @@ import Loading from "../../components/Loading";
 import Title from "../../components/admin/Title";
 import { dateFormat } from "../../lib/dateFormat";
 import { useAppContext } from "../../context/AppContext";
+import { API_URL } from "../../config"; // ✅ Import API_URL
 
 const ListShows = () => {
   const { axios, getToken, user } = useAppContext();
@@ -14,13 +15,14 @@ const ListShows = () => {
 
   const getAllShow = async () => {
     try {
-      const { data } = await axios.get("/api/admin/all-shows", {
+      // ✅ Use API_URL for deployed backend
+      const { data } = await axios.get(`${API_URL}/api/admin/all-shows`, {
         headers: { Authorization: `Bearer ${await getToken()}` },
       });
       setShows(data.shows);
       setLoading(false);
     } catch (error) {
-      console.error(error);
+      console.error("Error fetching shows:", error);
     }
   };
 
@@ -70,3 +72,4 @@ const ListShows = () => {
 };
 
 export default ListShows;
+
