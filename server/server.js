@@ -37,8 +37,7 @@ app.use("/api/booking", bookingRouter);
 app.use("/api/admin", adminRouter);
 app.use("/api/user", userRouter);
 
-// Start server
-app.listen(port, () =>
-  console.log(`Server listening at port ${port}`) // ✅ Log without localhost
-);
-
+// ✅ Start server (no dot after this)
+app.listen(port, () => {
+  console.log(`Server listening at port ${port}`);
+});
