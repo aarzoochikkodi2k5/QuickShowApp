@@ -12,6 +12,7 @@ import BlurCircle from "../../components/BlurCircle";
 import { dateFormat } from "../../lib/dateFormat";
 import { useAppContext } from "../../context/AppContext";
 import toast from "react-hot-toast";
+import { API_URL } from "../../config"; // ✅ Import API_URL
 
 const Dashboard = () => {
   const { axios, getToken, user, image_base_url } = useAppContext();
@@ -52,7 +53,7 @@ const Dashboard = () => {
 
   const fetchDashboardData = async () => {
     try {
-      const { data } = await axios.get("/api/admin/dashboard", {
+      const { data } = await axios.get(`${API_URL}/api/admin/dashboard`, {
         headers: { Authorization: `Bearer ${await getToken()}` },
       });
 
@@ -63,7 +64,8 @@ const Dashboard = () => {
         toast.error(data.message);
       }
     } catch (error) {
-      toast.error("Error fetching dashboard data:", error);
+      console.error("Error fetching dashboard data:", error);
+      toast.error("Error fetching dashboard data. Please try again.");
     }
   };
 
@@ -130,3 +132,4 @@ const Dashboard = () => {
 };
 
 export default Dashboard;
+
