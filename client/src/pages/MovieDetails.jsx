@@ -8,6 +8,7 @@ import MovieCard from "../components/MovieCard";
 import Loading from "../components/Loading";
 import { useAppContext } from "../context/AppContext";
 import toast from "react-hot-toast";
+import { API_URL } from "../config"; // add API_URL
 
 const MovieDetails = () => {
   const navigate = useNavigate();
@@ -24,23 +25,25 @@ const MovieDetails = () => {
     image_base_url,
   } = useAppContext();
 
+  // Fetch show details
   const getShow = async () => {
     try {
-      const { data } = await axios.get(`/api/show/${id}`);
+      const { data } = await axios.get(`${API_URL}/api/show/${id}`);
       if (data.success) {
-        setShow(data);
+        setShow(data.show); // make sure to store correct object
       }
     } catch (error) {
-      console.log(error);
+      console.error(error);
     }
   };
 
+  // Toggle favorite movie
   const handleFavorite = async () => {
     try {
       if (!user) return toast.error("Please login to proceed");
 
       const { data } = await axios.post(
-        "/api/user/update-favorite",
+        `${API_URL}/api/user/update-favorite`,
         { movieId: id },
         { headers: { Authorization: `Bearer ${await getToken()}` } }
       );
@@ -50,7 +53,7 @@ const MovieDetails = () => {
         toast.success(data.message);
       }
     } catch (error) {
-      console.log(error);
+      console.error(error);
     }
   };
 
@@ -114,7 +117,7 @@ const MovieDetails = () => {
         </div>
       </div>
 
-      <p className="text-lg fontmedium mt-20">Your Favorite Cast</p>
+      <p className="text-lg font-medium mt-20">Your Favorite Cast</p>
       <div className="overflow-x-auto no-scrollbar mt-8 pb-4">
         <div className="flex items-center gap-4 w-max px-4">
           {show.movie.casts.slice(0, 12).map((cast, index) => (
@@ -158,3 +161,4 @@ const MovieDetails = () => {
 };
 
 export default MovieDetails;
+
