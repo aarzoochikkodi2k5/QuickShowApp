@@ -8,7 +8,6 @@ import { Link } from "react-router-dom";
 
 const MyBookings = () => {
   const currency = import.meta.env.VITE_CURRENCY;
-
   const { axios, getToken, user, image_base_url } = useAppContext();
 
   const [bookings, setBookings] = useState([]);
@@ -21,7 +20,7 @@ const MyBookings = () => {
       });
 
       if (data.success) {
-        setBookings(data.bookings);
+        setBookings(data.bookings || []);
       }
     } catch (error) {
       console.log(error);
@@ -35,7 +34,16 @@ const MyBookings = () => {
     }
   }, [user]);
 
-  return !isLoading ? (
+  if (isLoading) return <Loading />;
+
+  if (!bookings.length)
+    return (
+      <div className="flex flex-col items-center justify-center h-screen">
+        <h1 className="text-3xl font-bold">You have no bookings yet</h1>
+      </div>
+    );
+
+  return (
     <div className="relative px-6 md:px-16 lg:px-40 pt-30 md:pt-40 min-h-[80vh]">
       <BlurCircle top="100px" left="100px" />
       <div>
@@ -71,7 +79,7 @@ const MyBookings = () => {
                 {currency}
                 {item.amount}
               </p>
-              {!item.isPaid && (
+              {!item.isPaid && item.paymentLink && (
                 <Link
                   to={item.paymentLink}
                   className="bg-primary px-4 py-1.5 mb-3 text-sm rounded-full font-medium cursor-pointer"
@@ -83,20 +91,19 @@ const MyBookings = () => {
             <div className="text-sm">
               <p>
                 <span className="text-gray-400">Total Tickets:</span>{" "}
-                {item.bookedSeats.length}
+                {item.bookedSeats?.length || 0}
               </p>
               <p>
                 <span className="text-gray-400">Seat Number:</span>{" "}
-                {item.bookedSeats.join(", ")}
+                {item.bookedSeats?.join(", ") || "N/A"}
               </p>
             </div>
           </div>
         </div>
       ))}
     </div>
-  ) : (
-    <Loading />
   );
 };
 
 export default MyBookings;
+
